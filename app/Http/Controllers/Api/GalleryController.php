@@ -13,6 +13,7 @@ use App\Http\Resources\PublicResources\GalleryShowResource;
 use App\Http\Resources\PublicResources\GalleryIndexResource;
 use App\Models\Gallery;
 use App\Models\Image;
+use http\Env\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -191,8 +192,8 @@ class GalleryController extends Controller
 
             $gallery = Gallery::where('id', $request->id)->firstorfail();
 
-            $updated_at = new DateTime($gallery->updated_at);
-            $fetched_at = new DateTime($request->fetchedAt);
+            $updated_at = Carbon::parse($gallery->updated_at);
+            $fetched_at = Carbon::parse($request->fetchedAt);
 
             if($updated_at > $fetched_at){
 
@@ -285,7 +286,7 @@ class GalleryController extends Controller
                         'path' => $path,
                         'extension' => $image->extension(),
                         'size' => $image->getSize(),
-                        'thumbnails' => false
+                        'thumbnail' => false
                     ]);
                 }
 
@@ -313,15 +314,22 @@ class GalleryController extends Controller
 
         try {
 
-            $originalImagesIds = array_column($images, 'id');
+            $newImagesIds = $request->originalImagesIds;
+            $currentImagesIds = array_column($images, 'id');
 
-            if ($originalImagesIds !== $request->originalImagesIds) {
+            if(empty($newImagesIds)){
+
+                $newImagesIds = ['0'];
+
+            }
+
+            if ($currentImagesIds !== $newImagesIds) {
 
                 $originalImagesPaths = array_column($images, 'path');
-                $imagesToDelete = array_diff($originalImagesIds, $request->originalImagesIds);
+                $imagesToDelete = array_diff($currentImagesIds, $newImagesIds);
 
                 foreach ($imagesToDelete as $key => $value) {
-                    Storage::delete($originalImagesPaths[$key]);
+                    Storage::delete("public/$originalImagesPaths[$key]");
                 }
 
                 $gallery->images()->whereIn('id', $imagesToDelete)->delete();

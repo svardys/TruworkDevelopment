@@ -31,7 +31,7 @@ class GalleryUpdateRequest extends FormRequest
             'thumbnail' => 'image|mimes:jpeg,jpg,png',
             'images' => 'array',
             'images.*' => 'image|mimes:jpeg,jpg,png',
-            'originalImagesIds' => 'required|array',
+            'originalImagesIds' => 'required_without:images|array',
             'originalImagesIds.*' => 'integer',
             'fetchedAt' => 'required|date'
         ];
@@ -53,6 +53,7 @@ class GalleryUpdateRequest extends FormRequest
             'images.*.image' => 'Soubory musí být obrázky typu: jpeg, jpg nebo png',
             'images.*.mimes' => 'Soubory musí být obrázky typu: jpeg, jpg nebo png',
             'originalImagesIds.required' => 'Povinné pole',
+            'originalImagesIds.required_without' => 'Povinné pole',
             'originalImagesIds.array' => 'Nevalidní hodnota',
             'originalImagesIds.*' => 'Nevalidní hodnota',
             'fetchedAt.required' => 'Povinné pole',
